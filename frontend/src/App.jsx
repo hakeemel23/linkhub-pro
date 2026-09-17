@@ -16,7 +16,10 @@ function App() {
 
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
-  const [isPreview, setIsPreview] = useState(false);
+  const [isPreview, setIsPreview] = useState(true);
+
+  // غي نتا لي عندك هاد الرابط تقدر تعدل
+  const isAdmin = window.location.search.includes("admin=adam123");
 
   useEffect(() => {
     localStorage.setItem("links", JSON.stringify(links));
@@ -24,23 +27,27 @@ function App() {
 
   const addLink = () => {
     if (!title ||!url) return;
-    setLinks([...links, { id: Date.now(), title, url }]);
-    setTitle(""); setUrl("");
+    let finalUrl = url.startsWith("http")? url : `https://${url}`;
+    setLinks([...links, { id: Date.now(), title, url: finalUrl }]);
+    setTitle("");
+    setUrl("");
   };
 
-  // PREVIEW MODE - كيفاش كيشوفوه الناس
-  if (isPreview) {
+  // إلى ماشي أدمن -> يبان غي البروفايل للزوار
+  if (isPreview ||!isAdmin) {
     return (
       <div className="preview-page">
-        <button className="preview-toggle" onClick={() => setIsPreview(false)}>
-          Back to Edit
-        </button>
+        {isAdmin && (
+          <button className="preview-toggle" onClick={() => setIsPreview(false)}>
+            Edit Mode ✏️
+          </button>
+        )}
         <div className="preview-card">
           <img src={myAvatar} className="avatar" alt="avatar" />
           <h2>Adam Smith</h2>
           <p>Digital Creator 🚀</p>
           <div className="links">
-            {links.map(l => (
+            {links.map((l) => (
               <a key={l.id} href={l.url} target="_blank" rel="noreferrer">
                 {l.title}
               </a>
@@ -51,7 +58,7 @@ function App() {
     );
   }
 
-  // EDIT MODE - اليسار فيه المعاينة واليمين فيه التحكم
+  // EDIT MODE - كيبان غي ليك
   return (
     <div className="layout">
       <button className="preview-toggle" onClick={() => setIsPreview(true)}>
@@ -63,7 +70,7 @@ function App() {
         <h2>Adam Smith</h2>
         <p>Digital Creator 🚀</p>
         <div className="links">
-          {links.map(l => (
+          {links.map((l) => (
             <a key={l.id} href={l.url} target="_blank" rel="noreferrer">
               {l.title}
             </a>
@@ -73,18 +80,21 @@ function App() {
 
       <div className="right">
         <h3>Dashboard</h3>
-        <input placeholder="Link Title" value={title} onChange={e => setTitle(e.target.value)} />
-        <input placeholder="https://..." value={url} onChange={e => setUrl(e.target.value)} />
+        <input placeholder="Link Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input placeholder="https://..." value={url} onChange={(e) => setUrl(e.target.value)} />
         <button className="add" onClick={addLink}>Add Link</button>
 
         <div className="manage">
-          {links.map(l => (
+          {links.map((l) => (
             <div key={l.id} className="manage-row">
               <span>{l.title}</span>
-              <button onClick={() => setLinks(links.filter(x => x.id!== l.id))}>Delete</button>
+              <button onClick={() => setLinks(links.filter((x) => x.id!== l.id))}>Delete</button>
             </div>
           ))}
         </div>
+        <p style={{marginTop: '20px', fontSize: '12px', opacity: 0.6}}>
+          رابط الزوار: / <br/> رابط الإدارة:?admin=adam123
+        </p>
       </div>
     </div>
   );
